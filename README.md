@@ -1,35 +1,22 @@
-qlint
-=====
-Sanity checker for PBS torque job files
+vsc-cluster-db
+==============
+Create a sqlite database with information on a compute cluster derived 
+from PBS torque tools
 
-Problems signalled
-------------------
-Errors:
-  * Non-unix line endings
-  * Non-ASCII charactersa in PBS file
-  * Invalid values for join (-j)
-  * Invalid values for keep (-k)
-  * Invalid values for mail event (-m)
-  * Malformed job name (-N)
-  * Malformed project name (-A)
-  * Invalid walltime format (-l walltime=...)
-  * Non-numerical ppn, procs, or gpus specification
-  * Invalid memory and process memory specification
-  * Multpile procs resource specifications
-  * Memory resources not available for combination of nodes, ppn, and pmem
-  * Memory resources not available for combinatino of nodes and mem
-  * Unknown partition specified
-  * Unknown QOS specified
-  * Number of nodes requested too large in partition
-  * ppn too large
+Functionality
+-------------
+* `create_node_db.py`: creates the tables in a SQLite 3.x database to
+    store information on the resources and features of compute nodes
+* `load_node_db.py`: populate the database using the output of PBS torque
+    `pbsnodes` command, and a configuration file
+* `dump_node_states.py`: prints node status
 
-Warnings:
-  * Missing shebang
-  * Misplaced shebang
-  * Space in directive, i.e., '# PBS', rather than '#PBS'
-  * PBS directives after first script statement
-  * Missing script
-  * Invalid mail addresses (-M)
-  * Unknown resource specication (-l)
-  * Memory specification for pmem and mem not consistent
+Dependencies
+------------
+* https://github.com/gjbex/vsc-tools-lib : the `lib` directory should be
+    in the `PYTHONPATH` variable
+* Python 2.7.x
 
+Reverse dependencies
+--------------------
+* database is used by qlint (https://github.com/gjbex/qlint)
