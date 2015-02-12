@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 '''module to test the loading of a cluster database'''
 
-import json, os, sqlite3, unittest
+import json, os, sqlite3, StringIO, sys, unittest
 import create_node_db
 import load_node_db
 from vsc.pbs.pbsnodes import PbsnodesParser
@@ -37,4 +37,9 @@ class LoadNodeDbTest(unittest.TestCase):
         with sqlite3.connect(self._file_name) as conn:
             load_node_db.insert_partitions(conn, partitions)
             load_node_db.insert_qos_levels(conn, qos_levels)
+            error = sys.stderr
+            sys.stderr = StringIO.StringIO()
             load_node_db.insert_node_info(conn, nodes, partitions)
+            print 'my error', sys.stderr.get_value()
+            sys.stderr = error
+            cursor = conn.cursor()
