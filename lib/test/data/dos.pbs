@@ -1,4 +1,0 @@
-#!/bin/bash -l
-#PBS -l nodes=1:ppn=20
-
-hostname

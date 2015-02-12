@@ -1,6 +1,0 @@
-#!/bin/bash -l
-#PBS -l nodes=1:ppn=20
-# PBS -N all_those_spaces
-
-hostname
-

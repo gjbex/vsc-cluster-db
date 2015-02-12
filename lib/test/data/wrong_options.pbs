@@ -1,6 +1,0 @@
-#!/bin/bash -l
-#PBS -j ae
-#PBS -m ae
-#PBS -N aaaaaaaaaaaaaaaaa 
-echo "hello world!'
-

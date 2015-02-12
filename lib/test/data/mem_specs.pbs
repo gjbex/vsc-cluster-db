@@ -1,5 +1,0 @@
-#!/bin/bash -l
-#PBS -l nodes=2:ppn=4
-#PBS -l mem=4qb
-
-echo "hello world!"
