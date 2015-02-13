@@ -136,7 +136,6 @@ if __name__ == '__main__':
     arg_parser.add_argument('--force', action='store_true',
                             help='when database exists, first drop tables')
     options = arg_parser.parse_args()
-    conn = sqlite3.connect(options.db)
-    init_db(conn, DB_DESC, force=options.force,
-            create_jobs_tables=options.jobs)
-
+    with sqlite3.connect(options.db) as conn:
+        init_db(conn, DB_DESC, force=options.force,
+                create_jobs_tables=options.jobs)
