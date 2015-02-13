@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+'''Functions to create a database to store information on nodes in
+   a compute cluster with a PBS torque resource manager'''
 
 import sqlite3, sys
 
