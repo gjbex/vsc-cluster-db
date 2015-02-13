@@ -18,6 +18,7 @@ NO_PARTITIONS_ERROR = 6
 NO_QOS_LEVELS_ERROR = 7
 NO_PBSNODES_CMD_ERROR = 8
 NO_SHOWQ_CMD_ERROR = 9
+DB_EXISTS_ERROR = 10
 
 def insert_partitions(conn, partition_list):
     '''insert partitions, and return a dictionary of partition names
@@ -219,7 +220,8 @@ def get_showq_cmd(showq_str, config):
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
-    import sqlite3, subprocess
+    import os.path, sqlite3, subprocess
+    import create_node_db
 
     arg_parser = ArgumentParser(description=('loads a database with node '
                                              'information'))
@@ -234,6 +236,10 @@ if __name__ == '__main__':
                             help='QOS defined for the cluster')
     arg_parser.add_argument('--jobs', action='store_true',
                             help='create job-related tables')
+    arg_parser.add_argument('--force', action='store_true',
+                            help='force to create a new DB')
+    arg_parser.add_argument('--verbose', action='store_true',
+                            help='show information for debugging')
     arg_parser.add_argument('--pbsnodes', help='pbsnodes command to use')
     arg_parser.add_argument('--showq', help='showq command to use')
     options = arg_parser.parse_args()
@@ -243,6 +249,16 @@ if __name__ == '__main__':
     pbs_nodes_cmd = get_pbsnodes_cmd(options.pbsnodes, config)
     nodes = get_nodes(options.pbsnodes, options.pbsnodes_file,
                       options.verbose)
+    if not os.path.isfile(options.db):
+        with sqlite3.connect(options.db) as conn:
+            create_node_db.init_db(conn, create_node_db.DB_DESC)
+    elif not options.force:
+        msg = "### error: DB '{0}' already exists"
+        sys.stderr.write(msg.format(options.db))
+        sys.exit(DB_EXISTS_ERROR)
+    else:
+        with sqlite3.connect(self._file_name) as conn:
+            create_node_db.init_db(conn, create_node_db.DB_DESC, force=True)
     with sqlite3.connect(options.db) as conn:
         partitions = insert_partitions(conn, partition_list)
         insert_qos_levels(conn, qos_levels)
