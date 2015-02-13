@@ -177,7 +177,7 @@ if __name__ == '__main__':
             except subprocess.CalledProcessError:
                 sys.stderr.write('### error: could not execute showq\n')
                 sys.exit(SHOWQ_CMD_ERROR)
-    with sqlite3.connect(options.db) as conn:
+    with sqlite3.connect(options.db) as conn: 
         partitions = insert_partitions(conn, partition_list)
         insert_qos_levels(conn, qos_levels)
         insert_node_info(conn, nodes, partitions, options.jobs)
