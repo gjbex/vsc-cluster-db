@@ -131,10 +131,10 @@ def read_config(config_file_name, is_verbose=False):
 def get_nodes(pbsnodes_cmd, pbsnodes_file_name=None, is_verbose=False):
     '''Retrieve node information, either by running the pbsnodes command,
        or reading the information from a file'''
+    pbsnodes_parser = PbsnodesParser()
     if pbsnodes_file_name:
         try:
             with open(pbsnodes_file_name, 'r') as node_file:
-                pbsnodes_parser = PbsnodesParser()
                 nodes = pbsnodes_parser.parse_file(node_file)
         except IOError as error:
             msg = '### error reading pbsnodes file:  {0}'
@@ -142,6 +142,7 @@ def get_nodes(pbsnodes_cmd, pbsnodes_file_name=None, is_verbose=False):
             sys.exit(NO_PBSNODES_FILE_ERROR)
     else:
         try:
+            pbsnodes_cmd = config['pbsnodes_cmd']
             node_output = subprocess.check_output([pbsnodes_cmd])
             nodes = pbsnodes_parser.parse(node_output)
             if is_verbose:
