@@ -7,6 +7,7 @@ import json, sys
 from vsc.pbs.utils import compute_features, compute_partition
 from vsc.utils import hostname2rackinfo
 from vsc.pbs.pbsnodes import PbsnodesParser
+from vsc.moab.checknode import ChecknodeParser
 from vsc.moab.showq import ShowqParser
 
 NO_CONFIG_FILE_ERROR = 1
@@ -18,7 +19,8 @@ NO_PARTITIONS_ERROR = 6
 NO_QOS_LEVELS_ERROR = 7
 NO_PBSNODES_CMD_ERROR = 8
 NO_SHOWQ_CMD_ERROR = 9
-DB_EXISTS_ERROR = 10
+NO_CHECKNODE_CMD_ERROR = 10
+DB_EXISTS_ERROR = 11
 
 def insert_partitions(conn, partition_list):
     '''insert partitions, and return a dictionary of partition names
@@ -128,9 +130,10 @@ def read_config(config_file_name, is_verbose=False):
             sys.exit(NO_CONFIG_FILE_ERROR)
     return config
 
-def get_nodes(pbsnodes_cmd, pbsnodes_file_name=None, is_verbose=False):
+def get_nodes(pbsnodes_cmd, checknode_cmd, pbsnodes_file_name=None,
+              checknode_file_name=None, is_verbose=False):
     '''Retrieve node information, either by running the pbsnodes command,
-       or reading the information from a file'''
+       or reading the information from a file, returns a list of nodes'''
     pbsnodes_parser = PbsnodesParser()
     if pbsnodes_file_name:
         try:
@@ -142,7 +145,6 @@ def get_nodes(pbsnodes_cmd, pbsnodes_file_name=None, is_verbose=False):
             sys.exit(NO_PBSNODES_FILE_ERROR)
     else:
         try:
-            pbsnodes_cmd = config['pbsnodes_cmd']
             node_output = subprocess.check_output([pbsnodes_cmd])
             nodes = pbsnodes_parser.parse(node_output)
             if is_verbose:
@@ -150,6 +152,9 @@ def get_nodes(pbsnodes_cmd, pbsnodes_file_name=None, is_verbose=False):
         except subprocess.CalledProcessError:
             sys.stderr.write('### error: could not execute pbsnodes\n')
             sys.exit(PBSNODES_CMD_ERROR)
+    checknodeParser = ChecknodeParser()
+    for node in nodes:
+        pass
     return nodes
 
 def get_jobs(showq_cmd, showq_file_name=None, is_verbose=False):
@@ -208,6 +213,17 @@ def get_pbsnodes_cmd(pbsnodes_str, config):
         sys.stderr.write('### error: no pbsnodes command specified\n')
         sys.exit(NO_PBSNODES_CMD_ERROR)
 
+def get_checknode_cmd(checknode_str, config):
+    '''Get checknode command, either from command line options, or from
+       configuration file'''
+    if checknode_str:
+        return checknode_str
+    elif config and 'checknode_cmd' in config:
+        return config['checknode_cmd']
+    else:
+        sys.stderr.write('### error: no checknode command specified\n')
+        sys.exit(NO_CHECKNODE_CMD_ERROR)
+
 def get_showq_cmd(showq_str, config):
     '''Get showq command, either from command line options, or from
        configuration file'''
@@ -228,6 +244,7 @@ if __name__ == '__main__':
                                              'information'))
     arg_parser.add_argument('--conf', help='JSON configuration file')
     arg_parser.add_argument('--pbsnodes_file', help='pbsnodes file')
+    arg_parser.add_argument('--checknode_file', help='checknode file')
     arg_parser.add_argument('--showq_file', help='showq file')
     arg_parser.add_argument('--db', default='nodes.db',
                             help='file to store the database in')
@@ -247,9 +264,12 @@ if __name__ == '__main__':
     config = read_config(options.conf, options.verbose)
     partition_list = get_partitions(options.partitions, config)
     qos_levels = get_qos_levels(options.qos_levels, config)
-    pbs_nodes_cmd = get_pbsnodes_cmd(options.pbsnodes, config)
-    nodes = get_nodes(options.pbsnodes, options.pbsnodes_file,
-                      options.verbose)
+    pbsnodes_cmd = get_pbsnodes_cmd(options.pbsnodes, config)
+    checknode_cmd = get_checknode_cmd(options.checknode, config)
+    nodes = get_nodes(pbsnodes_cmd, checknode_cmd,
+                      pbsnodes_file_name=options.pbsnodes_file,
+                      checknode_file_name=options.checknode_file,
+                      is_verbose=options.verbose)
     if not os.path.isfile(options.db):
         with sqlite3.connect(options.db) as conn:
             create_node_db.init_db(conn, create_node_db.DB_DESC)
