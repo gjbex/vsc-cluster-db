@@ -259,6 +259,7 @@ if __name__ == '__main__':
     arg_parser.add_argument('--verbose', action='store_true',
                             help='show information for debugging')
     arg_parser.add_argument('--pbsnodes', help='pbsnodes command to use')
+    arg_parser.add_argument('--checknode', help='checknode command to use')
     arg_parser.add_argument('--showq', help='showq command to use')
     options = arg_parser.parse_args()
     config = read_config(options.conf, options.verbose)
