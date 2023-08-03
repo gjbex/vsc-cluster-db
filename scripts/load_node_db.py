@@ -102,13 +102,12 @@ def insert_jobs(conn, jobs):
                                         wclimit, queuetime) VALUES
                                        (?, ?, ?, ?, ?, ?)'''
     for job_state in jobs:
-        if job_state == 'active':
-            for job in jobs[job_state]:
+        for job in jobs[job_state]:
+            if job_state == 'active':
                 cursor.execute(active_jobs_insert_cmd,
                                (job.id, job.username, job.state,
                                 job.procs, job.remaining, job.starttime))
-        else:
-            for job in jobs[job_state]:
+            else:
                 cursor.execute(nonactive_jobs_insert_cmd,
                                (job.id, job.username, job.state,
                                 job.procs, job.wclimit, job.queuetime))
